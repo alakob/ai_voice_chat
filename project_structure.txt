@@ -1,0 +1,17 @@
+src/
+├── voice_assistant/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── models.py
+│   ├── exceptions.py
+│   ├── state.py
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── audio_service.py
+│   │   └── openai_service.py
+│   └── ui/
+│       ├── __init__.py
+│       └── gradio_interface.py
+├── main.py
+├── requirements.txt
+└── .env 
