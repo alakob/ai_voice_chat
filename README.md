@@ -23,7 +23,7 @@ A real-time voice interaction system that converts speech to text, generates AI 
 1. Clone the repository:
 ```
 bash
-git clone https://github.com/yourusername/ai_voice_chat.git
+git clone https://github.com/alakob/ai_voice_chat.git
 cd ai_voice_chat
 ```
 2. Create and activate a virtual environment:
