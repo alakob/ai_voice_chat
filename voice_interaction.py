@@ -198,7 +198,7 @@ async def text_to_speech(text: str, client: AsyncOpenAI) -> None:
             model="tts-1",
             voice="alloy",
             input=text,
-            speed=1.0
+            speed=1.25
         )
         
         # Convert response to audio data

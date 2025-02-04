@@ -39,6 +39,19 @@ async def start_recording(audio_config: AudioConfig) -> None:
         logger.error(f"Error starting recording: {str(e)}")
         raise AudioProcessingError(f"Failed to start recording: {str(e)}")
 
+def stop_audio_playback():
+    """Stop current audio playback"""
+    try:
+        sd.stop()  # Stop sounddevice playback
+        if audio_state.is_playing:
+            audio_state.is_playing = False
+            if audio_state.stop_event:
+                audio_state.stop_event.set()
+        return True
+    except Exception as e:
+        logger.error(f"Error stopping audio playback: {e}")
+        return False
+
 async def play_audio(audio_data: Union[np.ndarray, bytes]) -> None:
     """Play audio data using sounddevice"""
     try:
@@ -49,10 +62,17 @@ async def play_audio(audio_data: Union[np.ndarray, bytes]) -> None:
         audio_state.stop_event = asyncio.Event()
         
         sd.play(audio_data, AudioConfig().sample_rate)
-        sd.wait()
         
+        # Wait for playback to complete or stop event
+        while sd.get_stream().active and not audio_state.stop_event.is_set():
+            await asyncio.sleep(0.1)
+            
+        if audio_state.stop_event.is_set():
+            sd.stop()
+            
     except Exception as e:
         logger.error(f"Error playing audio: {e}")
         raise AudioProcessingError(f"Failed to play audio: {str(e)}")
     finally:
-        audio_state.is_playing = False 
+        audio_state.is_playing = False
+        audio_state.stop_event = None 

@@ -50,9 +50,9 @@ async def text_to_speech(text: str, client: AsyncOpenAI, speed: float = 1.0) -> 
         audio_data = BytesIO(response.content)
         data, samplerate = sf.read(audio_data)
         
-        # Play the audio
-        sd.play(data, samplerate)
-        sd.wait()
+        # Use the improved play_audio function
+        from .audio_service import play_audio
+        await play_audio(data)
         
     except Exception as e:
         logger.error(f"Error in text-to-speech: {e}")

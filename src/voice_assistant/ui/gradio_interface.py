@@ -122,7 +122,7 @@ def create_interface():
                             asyncio.run(openai_service.text_to_speech(
                                 text=response,
                                 client=client,
-                                speed=1.25  # Increased playback speed
+                                speed=1  # Increased playback speed
                             ))
                             
                             # Final update
@@ -149,14 +149,13 @@ def create_interface():
     def safe_stop_audio():
         """Stop audio playback"""
         try:
-            if audio_state.is_playing:
-                audio_state.is_playing = False
-                if hasattr(audio_state, 'stop_event'):
-                    audio_state.stop_event.set()
-            return "Audio playback stopped"
+            from ..services.audio_service import stop_audio_playback
+            if stop_audio_playback():
+                return "Audio playback stopped"
+            return "No audio playing"
         except Exception as e:
             logger.error(f"Error stopping audio: {e}")
-            return f"Error: {str(e)}"
+            return f"Error stopping audio: {str(e)}"
 
     # Create Gradio interface
     with gr.Blocks(theme=gr.themes.Soft()) as interface:
@@ -184,14 +183,14 @@ def create_interface():
             stop_button = gr.Button("⏹️ Stop Recording", variant="stop", visible=False)
             stop_audio_button = gr.Button("🔇 Stop Audio", variant="secondary")
 
-        # Event handlers with queue enabled for real-time updates
-        record_button.click(
+        # Event handlers
+        record_event = record_button.click(
             fn=safe_start_recording,
             outputs=[record_button, stop_button, status],
             queue=False  # Immediate UI update
         )
         
-        stop_button.click(
+        stop_event = stop_button.click(
             fn=safe_stop_recording,
             outputs=[record_button, stop_button, status, text_input, response_text],
             queue=True  # Enable queuing for progressive updates
@@ -200,7 +199,8 @@ def create_interface():
         stop_audio_button.click(
             fn=safe_stop_audio,
             outputs=[status],
-            queue=False
+            queue=False,
+            cancels=[stop_event]  # Cancel the stop recording event instead of using string
         )
 
         return interface 
